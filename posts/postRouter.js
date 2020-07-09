@@ -17,40 +17,38 @@ router.get('/',  (req, res) => {
   })
 });
 
-router.get('/:id', validatePostId, (req, res) => {
+router.get('/:id', validatePostId,  (req, res) => {
   // do your magic!
-  
-  res.status(200).json(req.posts)
-  
-  
-//   postDb.getById(req.params.id)
-//   .then(post=>{
-//     if(post){
-//       res.status(200).json(post)
-//     } else{
-//       res.status(404).json({ message: "The post with the specified ID does not exist."})
-//     }
-//   })
+   postDb.getById(req.params.id)
+  .then(post=>{
+    if(post){
+      res.status(200).json({data:post})
+    } else{
+      res.status(404).json({ message: "The post with the specified ID does not exist."})
+    }
+  })
 });
 
 router.delete('/:id', (req, res) => {
   // do your magic!
   postDb.remove(req.params.id)
   .then(id=>{
-    if(id){
-      res.status(200).json({user:req})
-    } else{
-      res.status(400).json({message: " The user with the specified ID does not exist"})
-    }
+      res.status(200).json({user:'deleted'})
     })
+      
     .catch(err =>{
       res.status(500).json({message:'Message not removed.....muhahahahaahahaha'})
   })
   
 });
 
-router.put('/:id', (req, res) => {
+router.put('/:id', validatePostId, (req, res) => {
   // do your magic!
+  const changes = req.body
+  postDb.update(req.params.id, changes)
+  .then(user=>{
+    res.status(200).json({msg: 'post updated'})
+  })
 });
 
 // custom middleware

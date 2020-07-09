@@ -4,7 +4,7 @@ const chalk = require('chalk');
 const userDb = require('./userDb')
 
 const router = express.Router();
-router.use('/:id', validateUserId, validatePost)
+
 
 router.post('/', validateUser, (req, res) => {
   // do your magic!
@@ -18,9 +18,9 @@ router.post('/', validateUser, (req, res) => {
   // })
 });
 
-router.post('/:id/posts', (req, res) => {
+router.post('/:id/posts',validatePost, (req, res) => {
   // do your magic!
-  res.status(200).json(req.posts)
+  res.status(200).json(req.user)
   console.log(posts)
 });
 
@@ -36,7 +36,7 @@ router.get('/', (req, res) => {
   })
 });
 
-router.get('/:id', (req, res) => {
+router.get('/:id', validateUserId, (req, res) => {
   // do your magic!
   userDb.getById(req.params.id)
   .then(user=>{
@@ -64,7 +64,7 @@ router.delete('/:id', (req, res) => {
   // do your magic!
   userDb.remove(req.params.id)
   .then(id=>{
-   res.status(200).json({user:id})
+   res.status(200).json({user:'user deleted'})
   
     })
     .catch(err =>{
@@ -74,8 +74,12 @@ router.delete('/:id', (req, res) => {
 
 router.put('/:id', (req, res) => {
   // do your magic!
-  res.status(200).json(req.user)
-  console.log(chalk.blue, user)
+  const changes = req.body
+  userDb.update(req.params.id, changes)
+  .then(user=>{
+    res.status(200).json({msg: 'user updated'})
+  })
+ 
 });
 
 //custom middleware
@@ -85,7 +89,7 @@ function validateUserId(req, res, next) {
 
   const {id} = req.params
 
-  postDb.getById(req.params.id)
+  userDb.getById(req.params.id)
   .then(user =>{
     if (user) {
       req.user = user
@@ -122,6 +126,7 @@ function validatePost(req, res, next) {
   } else if(!req.body.text){
     res.status(400).json({ message: "missing required text field"})
   }else{
+    
     next()
   }
 }
